@@ -1,0 +1,14 @@
+{
+  "name": "telegram_bot",
+  "version": "0.1.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "HamletSargsyan <hamlets849@gmail.com>",
+  "license": "MIT",
+  "description": "",
+  "dependencies": {
+    "node-telegram-bot-api": "^0.66.0"
+  }
+}
