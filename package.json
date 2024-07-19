@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "main": "src/index.js",
   "scripts": {
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon src/index.js",
+    "prod": "node src/index.js"
   },
   "author": "HamletSargsyan <hamlets849@gmail.com>",
   "license": "MIT",
