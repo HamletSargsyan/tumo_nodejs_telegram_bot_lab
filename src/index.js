@@ -20,6 +20,8 @@ const defaultOptions = {
   parse_mode: "html"
 }
 
+
+
 /* -------------------------------------------------------------------------- */
 /*                                    utils                                   */
 /* -------------------------------------------------------------------------- */
@@ -40,7 +42,6 @@ function commandEq(message, command) {
 
 
 /**
- * 
  * @param {*} message 
  * @param {String} text 
  * @returns {boolean}
@@ -50,63 +51,82 @@ function textEq(message, text) {
 }
 
 
-class Option {
-  constructor (answer, correct_option_idx, options) {
-    this.answer = answer
-    this.correct_option_idx = correct_option_idx
-    this.options = options
-  }
-
-  prompt(chatId) {
-    bot.sendMessage(chatId, this.answer, {
-      reply_markup: this.asMarkup()
-    })
-  }
-
-  asMarkup() {
-    return {
-      keyboard: [this.options]
-    }
-  }
-
-  check(input) {
-    if (input === this.options[this.correct_option_idx]) {
-      return true
-    }
-    return false
-  }
-
-}
-
-const quiz = [
-  new Option("1 + 1", 0, ["2", "5", "11"]),
-  new Option("1 OR 0 AND 0", 0, ["0", "1"]),
-]
-
 
 /* -------------------------------------------------------------------------- */
 /*                                  handlers                                  */
 /* -------------------------------------------------------------------------- */
 
-let optionId = 0
+
+
+const emojis = ["🪨", "✂️", "📄"]
+
+
+const gameMarkup = {
+  inline_keyboard: [
+    [
+      { text: emojis[0], callback_data: "0" },
+      { text: emojis[1], callback_data: "1" },
+      { text: emojis[2], callback_data: "2" },
+    ],
+  ],
+}
+
 
 bot.on('text', (message) => {
   const chatId = message.chat.id;
-  /* -------------------------------- commands -------------------------------- */
-  switch (message.text) {
+
+  switch (message.text.toLowerCase().trim()) {
     case "/start":
-      quiz[optionId].prompt(chatId)
-      break;
-  
-    default:
-      if (quiz[optionId].check()) {
-        optionId += (1 ? optionId < quiz.length : 0)
-      } else {
-        optionId = 1
-        bot.sendMessage(chatId, "restart")
-      }
+
+      bot.sendMessage(chatId, "start cmd", {
+        reply_markup: gameMarkup
+      })
       break;
   }
+})
 
 
+let score = {
+  user: 0,
+  bot: 0
+}
+
+bot.on('callback_query', (call) => {
+  const chatId = call.message.chat.id;
+  const emojiIndex = parseInt(call.data)
+
+  let mess = "";
+  let userChoice = emojiIndex;
+  let botChoice = randint(0, 2)
+
+  mess += `\n\nbot ${emojis[botChoice]} | ${call.from.first_name} ${emojis[userChoice]}`
+
+  if (userChoice === botChoice) {
+    mess += `\n\nbot: +0 (${score.bot}) | user: +0 (${score.user})`
+  } else if (
+    (userChoice === 0 && botChoice === 2) ||
+    (userChoice === 1 && botChoice === 0) ||
+    (userChoice === 2 && botChoice === 1)
+  ) {
+    score.user++
+    mess += `\n\nuser: +1 (${score.user})`
+  } else {
+    score.bot++
+    mess += `\n\nbot: +1 (${score.bot})`
+  }
+
+  let markup;
+  if (score.user >= 10) {
+    mess += "\n\n<b>u win</b>"
+  } else if (score.bot >= 10) {
+    mess += "\n\n<b>bot win</b>"
+  } else {
+    markup = gameMarkup
+  }
+
+  bot.sendMessage(chatId, mess, {
+    reply_markup: markup,
+    ...defaultOptions
+  })
+  bot.answerCallbackQuery(call.id)
 })
