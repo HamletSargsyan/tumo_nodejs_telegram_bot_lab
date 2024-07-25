@@ -32,7 +32,7 @@ function randint(min, max) {
 
 
 /**
- * @param {*} message 
+ * @param {TelegramBot.Message} message 
  * @param {String} command 
  * @returns {boolean} 
  */
@@ -42,7 +42,7 @@ function commandEq(message, command) {
 
 
 /**
- * @param {*} message 
+ * @param {TelegramBot.Message} message 
  * @param {String} text 
  * @returns {boolean}
  */
