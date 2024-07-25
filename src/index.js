@@ -56,10 +56,16 @@ function textEq(message, text) {
 /*                                  handlers                                  */
 /* -------------------------------------------------------------------------- */
 
-
+let score = {
+  user: 0,
+  bot: 0
+}
 
 const emojis = ["🪨", "✂️", "📄"]
-
+const images = {
+  win: "https://www.biworldwide.ca/globalassets/how-do-you-win-with-incentives.jpg?width=720&height=630&mode=crop&scale=both",
+  lose: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSkGl7gJc6rVmMKm1NODntDZ5lyf6TIVldp7xEondefB5GPh7fzUJyRIvoyDVHwSHf784c&usqp=CAU",
+}
 
 const gameMarkup = {
   inline_keyboard: [
@@ -77,7 +83,9 @@ bot.on('text', (message) => {
 
   switch (message.text.toLowerCase().trim()) {
     case "/start":
-
+      score.bot = 0
+      score.user = 0
+      
       bot.sendMessage(chatId, "start cmd", {
         reply_markup: gameMarkup
       })
@@ -86,10 +94,7 @@ bot.on('text', (message) => {
 })
 
 
-let score = {
-  user: 0,
-  bot: 0
-}
+
 
 bot.on('callback_query', (call) => {
   const chatId = call.message.chat.id;
@@ -116,17 +121,29 @@ bot.on('callback_query', (call) => {
   }
 
   let markup;
+  let key;
   if (score.user >= 10) {
     mess += "\n\n<b>u win</b>"
+    key = "win"
   } else if (score.bot >= 10) {
     mess += "\n\n<b>bot win</b>"
+    key = "lose"
   } else {
     markup = gameMarkup
   }
 
-  bot.sendMessage(chatId, mess, {
-    reply_markup: markup,
-    ...defaultOptions
-  })
+  if (key) {
+    bot.sendPhoto(chatId, images[key], {
+      reply_markup: markup,
+      caption: mess,
+      ...defaultOptions
+    })
+  } else {
+    bot.sendMessage(chatId, mess, {
+      reply_markup: markup,
+      ...defaultOptions
+    })
+  
+  }
   bot.answerCallbackQuery(call.id)
 })
